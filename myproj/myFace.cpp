@@ -23,10 +23,6 @@ void myFace::computeNormal()
 	myPoint3D *b = e->next->source->point;
 	myPoint3D* c = e->next->next->source->point;
 
-	myVector3D v1(b->X - a->X, b->Y - a->Y, b->Z - a->Z);
-	myVector3D v2(c->X - a->X, c->Y - a->Y, c->Z - a->Z);
-
-	*normal = v1.crossproduct(v2);
-	normal->normalize();
+	normal->setNormal(a, b, c);
 
 }
