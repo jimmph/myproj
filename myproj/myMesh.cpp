@@ -81,39 +81,44 @@ bool myMesh::readFile(std::string filename)
 		else if (t == "s") {}
 		else if (t == "f")
 		{
-			cout << "f"; 
 			faceids.clear();
-			while (myline >> u) // read indices of vertices from a face into a container - it helps to access them later 
+			while (myline >> u)
 				faceids.push_back(atoi((u.substr(0, u.find("/"))).c_str()) - 1);
-			if (faceids.size() < 3) // ignore degenerate faces
+			if (faceids.size() < 3)
 				continue;
 
-			hedges = new myHalfedge * [faceids.size()]; // allocate the array for storing pointers to half-edges
+			hedges = new myHalfedge * [faceids.size()];
 			for (unsigned int i = 0; i < faceids.size(); i++)
-				hedges[i] = new myHalfedge(); // pre-allocate new half-edges
+				hedges[i] = new myHalfedge();
 
-			myFace* f = new myFace(); // allocate the new face
-			f->adjacent_halfedge = hedges[0]; // connect the face with incident edge
+			myFace* f = new myFace();
+			f->adjacent_halfedge = hedges[0];
 
 			for (unsigned int i = 0; i < faceids.size(); i++)
 			{
 				int iplusone = (i + 1) % faceids.size();
 				int iminusone = (i - 1 + faceids.size()) % faceids.size();
 
-				// YOUR CODE COMES HERE!
+				hedges[i]->next = hedges[iplusone];
+				hedges[i]->prev = hedges[iminusone];
+				hedges[i]->source = vertices[faceids[i]];
+				hedges[i]->adjacent_face = f;
 
-				// connect prevs, and next
+				vertices[faceids[i]]->originof = hedges[i];
 
-				// search for the twins using twin_map
+				pair<int, int> twin_edge = make_pair(faceids[iplusone], faceids[i]);
+				it = twin_map.find(twin_edge);
+				if (it != twin_map.end()) {
+					hedges[i]->twin = it->second;
+					it->second->twin = hedges[i];
+				}
+				twin_map[make_pair(faceids[i], faceids[iplusone])] = hedges[i];
 
-				// set originof
-				// push edges to halfedges in myMesh
+				halfedges.push_back(hedges[i]);
 			}
+
 			delete[] hedges;
-			// push faces to faces in myMesh
-
-
-			cout << endl;		
+			faces.push_back(f);
 		}
 	}
 
