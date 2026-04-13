@@ -259,11 +259,28 @@ void display()
 			if ((*it)->twin == NULL) continue;
 			myVertex *v2 = (*it)->twin->source;
 
-			if ( 0 /*ADD THE CONDITION TO CHECK IF THE HALFEDGE DEFINED BY (V1, V2) IS A SILHOUETTE EDGE*/ )
+			if (e->twin == NULL) continue;
+
+			myFace* f1 = e->adjacent_face;
+			myFace* f2 = e->twin->adjacent_face;
+
+			myPoint3D mid((v1->point->X + v2->point->X) / 2.0,
+				(v1->point->Y + v2->point->Y) / 2.0,
+				(v1->point->Z + v2->point->Z) / 2.0);
+
+			// view direction: from edge midpoint toward the camera
+			myVector3D view(camera_eye.X - mid.X,
+				camera_eye.Y - mid.Y,
+				camera_eye.Z - mid.Z);
+
+			double dot1 = f1->normal->dX * view.dX + f1->normal->dY * view.dY + f1->normal->dZ * view.dZ;
+			double dot2 = f2->normal->dX * view.dX + f2->normal->dY * view.dY + f2->normal->dZ * view.dZ;
+
+			if (dot1 * dot2 < 0)
 			{
 				silhouette_edges.push_back(v1->index);
 				silhouette_edges.push_back(v2->index);
-			}				
+			}
 		}
 
 		GLuint silhouette_edges_buffer;
