@@ -176,7 +176,68 @@ void myMesh::normalize()
 
 void myMesh::splitFaceTRIS(myFace *f, myPoint3D *p)
 {
-	/**** TODO ****/
+	// Collect halfedges around the face
+	std::vector<myHalfedge *> hedges;
+	myHalfedge *start = f->adjacent_halfedge;
+	myHalfedge *current = start;
+	do {
+		hedges.push_back(current);
+		current = current->next;
+	} while (current != start);
+
+	int n = hedges.size();
+
+	// Create the new center vertex
+	myVertex *v = new myVertex();
+	v->point = new myPoint3D(p->X, p->Y, p->Z);
+	vertices.push_back(v);
+
+	// Create new faces (reuse f for the first triangle)
+	std::vector<myFace *> newfaces(n);
+	newfaces[0] = f;
+	for (int i = 1; i < n; i++) {
+		newfaces[i] = new myFace();
+		faces.push_back(newfaces[i]);
+	}
+
+	// Create new halfedges: a[i] (from next vertex to v) and b[i] (from v to source of hedge[i])
+	std::vector<myHalfedge *> a(n), b(n);
+	for (int i = 0; i < n; i++) {
+		a[i] = new myHalfedge();
+		b[i] = new myHalfedge();
+		halfedges.push_back(a[i]);
+		halfedges.push_back(b[i]);
+	}
+
+	// Set up each triangle: hedges[i] -> a[i] -> b[i]
+	for (int i = 0; i < n; i++) {
+		a[i]->source = hedges[(i + 1) % n]->source;
+		b[i]->source = v;
+
+		hedges[i]->next = a[i];
+		a[i]->next = b[i];
+		b[i]->next = hedges[i];
+
+		hedges[i]->prev = b[i];
+		a[i]->prev = hedges[i];
+		b[i]->prev = a[i];
+
+		hedges[i]->adjacent_face = newfaces[i];
+		a[i]->adjacent_face = newfaces[i];
+		b[i]->adjacent_face = newfaces[i];
+
+		newfaces[i]->adjacent_halfedge = hedges[i];
+	}
+
+	// Set twin relationships for internal edges
+	// a[i] goes from source_{i+1} to v, b[(i+1)%n] goes from v to source_{i+1}
+	for (int i = 0; i < n; i++) {
+		a[i]->twin = b[(i + 1) % n];
+		b[(i + 1) % n]->twin = a[i];
+	}
+
+	// Set the new vertex's originof
+	v->originof = b[0];
 }
 
 void myMesh::splitEdge(myHalfedge *e1, myPoint3D *p)
