@@ -71,7 +71,7 @@ bool myMesh::readFile(std::string filename)
 			float x, y, z;
 			myline >> x >> y >> z;
 			cout << "v " << x << " " << y << " " << z << endl;
-			myPoint3D *p = new myPoint3D(x, y, z);
+			myPoint3D* p = new myPoint3D(x, y, z);
 			myVertex* v = new myVertex;
 			v->point = p;
 			vertices.push_back(v);
@@ -199,13 +199,31 @@ void myMesh::subdivisionCatmullClark()
 
 void myMesh::triangulate()
 {
-	/**** TODO ****/
+	int original_face_count = faces.size();
+	for (int i = 0; i < original_face_count; i++)
+		triangulate(faces[i]);
 }
 
 //return false if already triangle, true othewise.
 bool myMesh::triangulate(myFace *f)
 {
-	/**** TODO ****/
-	return false;
+	int count = 0;
+	double cx = 0, cy = 0, cz = 0;
+	myHalfedge * start = f->adjacent_halfedge;
+	myHalfedge * current = start;
+	do {
+		cx += current->source->point->X;
+		cy += current->source->point->Y;
+		cz += current->source->point->Z;
+		count++;
+		current = current->next;
+	} while (current != start);
+	if (count == 3) return false;
+	cx /= count;
+	cy /= count;
+	cz /= count;
+	myPoint3D centroid(cx, cy, cz);
+	splitFaceTRIS(f, &centroid);
+	return true;
 }
 

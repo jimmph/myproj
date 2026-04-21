@@ -19,10 +19,9 @@ void myFace::computeNormal()
 {
 	myHalfedge* e = adjacent_halfedge;
 
-	myPoint3D *a = e->source->point;
-	myPoint3D *b = e->next->source->point;
+	myPoint3D* a = e->source->point;
+	myPoint3D* b = e->next->source->point;
 	myPoint3D* c = e->next->next->source->point;
 
 	normal->setNormal(a, b, c);
-
 }

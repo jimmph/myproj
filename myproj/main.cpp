@@ -247,17 +247,16 @@ void display()
 	if (drawsilhouette)
 	{
 		glLineWidth(4.0);
-		color[0] = 1.0f, color[1] = 0.0f, color[2] = 0.0f, color[3] = 1.0f;		
+		color[0] = 1.0f, color[1] = 0.0f, color[2] = 0.0f, color[3] = 1.0f;
 		glUniform4fv(glGetUniformLocation(shaderprogram, "kd"), 1, &color[0]);
 
 		vector <GLuint> silhouette_edges;
-		for (vector<myHalfedge *>::iterator it = m->halfedges.begin(); it != m->halfedges.end(); it++)
+		for (vector<myHalfedge*>::iterator it = m->halfedges.begin(); it != m->halfedges.end(); it++)
 		{
-			/**** TODO: WRITE CODE TO COMPUTE SILHOUETTE ****/
-			myHalfedge *e = (*it);
-			myVertex *v1 = (*it)->source;
+			myHalfedge* e = (*it);
+			myVertex* v1 = (*it)->source;
 			if ((*it)->twin == NULL) continue;
-			myVertex *v2 = (*it)->twin->source;
+			myVertex* v2 = (*it)->twin->source;
 
 			if (e->twin == NULL) continue;
 
@@ -301,7 +300,7 @@ void display()
 		glDrawElements(GL_LINES, silhouette_edges.size(), GL_UNSIGNED_INT, 0);
 
 		glDeleteBuffers(1, &silhouette_edges_buffer);
- 	}
+	}
 
 	if (drawnormals && vaos[VAO_NORMALS])
 	{
